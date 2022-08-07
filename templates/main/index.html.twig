@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="d-grid gap-3">
+        {% for monitor in monitors %}
+            <a
+                role="button"
+                href="{{ path('app.main.toggle_monitor', {"monitorId": monitor.mid}) }}"
+                class="btn {{ monitor.mid in activeMonitorIds ? 'btn-success' : 'btn-danger' }}"
+            >{{ monitor.name }}</a>
+        {% endfor %}
+    </div>
+{% endblock %}

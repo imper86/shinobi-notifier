@@ -1,3 +1,5 @@
+/.idea/
+/rr
 
 ###> symfony/framework-bundle ###
 /.env.local
