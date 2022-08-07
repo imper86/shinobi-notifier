@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Event\NewVideoEvent;
-use App\Service\AppConfigRepository;
+use App\Exception\NoConfigException;
 use App\Service\ShinobiNewVideoFetcher;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,7 +19,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 final class WorkerCommand extends Command
 {
     public function __construct(
-        private readonly AppConfigRepository $configRepository,
         private readonly ShinobiNewVideoFetcher $newVideoFetcher,
         private readonly EventDispatcherInterface $eventDispatcher,
     ) {
@@ -31,13 +30,6 @@ final class WorkerCommand extends Command
         sleep(1);
 
         $io = new SymfonyStyle($input, $output);
-        $config = $this->configRepository->get();
-
-        if (null === $config) {
-            $io->error('No app config found. Please go to GUI.');
-
-            return 1;
-        }
 
         try {
             foreach ($this->newVideoFetcher->fetch() as $video) {
@@ -45,9 +37,7 @@ final class WorkerCommand extends Command
             }
         } catch (ClientExceptionInterface $exception) {
             $io->error(sprintf('Shinobi connection error: %s', $exception->getMessage()));
-
-            return 1;
-        }
+        } catch (NoConfigException) {}
 
         return 0;
     }

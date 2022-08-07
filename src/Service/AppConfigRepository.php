@@ -12,6 +12,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class AppConfigRepository
 {
+    private ?AppConfig $config = null;
+
     public function __construct(
         private readonly ParameterBagInterface $parameterBag,
         private readonly SerializerInterface $serializer
@@ -23,22 +25,25 @@ final class AppConfigRepository
      */
     public function get(): AppConfig
     {
+        if (null !== $this->config) {
+            return $this->config;
+        }
+
         $path = $this->getJsonPath();
 
         if (!file_exists($path)) {
             throw new NoConfigException();
         }
 
-        return $this->serializer->deserialize(file_get_contents($path), AppConfig::class, 'json');
-    }
+        $this->config = $this->serializer->deserialize(file_get_contents($path), AppConfig::class, 'json');
 
-    private function getJsonPath(): string
-    {
-        return sprintf('%s/var/app_config.json', $this->parameterBag->get('kernel.project_dir'));
+        return $this->config;
     }
 
     public function save(AppConfig $config): void
     {
+        $this->config = $config;
+
         $serialized = $this->serializer->serialize($config, 'json');
 
         file_put_contents($this->getJsonPath(), $serialized);
@@ -49,5 +54,10 @@ final class AppConfigRepository
         return new AppConfig(
             new ShinobiConfig('http', 'localhost', 8080, 'changeme', 'changeme'),
         );
+    }
+
+    private function getJsonPath(): string
+    {
+        return sprintf('%s/var/app_config.json', $this->parameterBag->get('kernel.project_dir'));
     }
 }
