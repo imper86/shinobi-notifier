@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <a
+        role="button"
+        class="btn btn-outline-primary mb-3"
+        href="{{ path('app.notification_config.create_select_type') }}"
+    >Add</a>
+
+    <ul class="list-group">
+        {% for key, config in configs %}
+            <li class="list-group-item d-flex justify-content-between align-items-center {% if config.enabled %}list-group-item-success{% endif %}">
+                <div>{{ config.serviceId }}</div>
+                <div>
+                    <a
+                        role="button"
+                        class="btn btn-outline-primary"
+                        href="{{ path('app.notification_config.edit', {"key": key}) }}"
+                    >Edit</a>
+
+                    <a
+                        role="button"
+                        class="btn btn-outline-danger"
+                        href="{{ path('app.notification_config.delete', {"key": key}) }}"
+                    >Delete</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
