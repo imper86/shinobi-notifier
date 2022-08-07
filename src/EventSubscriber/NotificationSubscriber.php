@@ -29,10 +29,6 @@ final class NotificationSubscriber implements EventSubscriberInterface
     {
         $config = $this->configRepository->get();
 
-        if (null === $config) {
-            return;
-        }
-
         if (!in_array($event->video->mid, $config->activeMonitorIds, true)) {
             return;
         }
@@ -44,10 +40,13 @@ final class NotificationSubscriber implements EventSubscriberInterface
                 $sender->send(
                     $senderConfig,
                     sprintf(
-                        '[%s] new video found at %s - file %s',
+                        '[%s] new video found at %s - %s://%s:%d%s',
                         $event->video->mid,
                         $event->video->time->format('c'),
-                        $event->video->filename,
+                        $config->shinobi->schema,
+                        $config->shinobi->host,
+                        $config->shinobi->port,
+                        $event->video->href,
                     ),
                 );
             }
