@@ -23,14 +23,12 @@ final class MainController extends AbstractController
     public function index(): Response
     {
         try {
-            $config = $this->configRepository->get();
             $monitors = $this->shinobiApi->getMonitors();
 
             return $this->render(
                 'main/index.html.twig',
                 [
                     'monitors' => $monitors,
-                    'activeMonitorIds' => $config->activeMonitorIds,
                 ]
             );
         } catch (ClientExceptionInterface $exception) {
@@ -45,7 +43,7 @@ final class MainController extends AbstractController
     {
         $config = $this->configRepository->get();
 
-        if (in_array($monitorId, $config->activeMonitorIds)) {
+        if (in_array($monitorId, $config->activeMonitorIds, true)) {
             array_splice(
                 $config->activeMonitorIds,
                 array_search($monitorId, $config->activeMonitorIds),
