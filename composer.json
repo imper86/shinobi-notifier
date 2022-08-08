@@ -25,6 +25,7 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
+        "imper86/vbump": "^1.0",
         "symfony/var-dumper": "6.1.*",
         "symfony/web-profiler-bundle": "6.1.*"
     },

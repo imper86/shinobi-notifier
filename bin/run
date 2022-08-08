@@ -1,2 +1,2 @@
 !#/bin/sh
-/usr/bin/supervisord -c /etc/supervisor/supervisord.conf -i app && ./rr serve
+/usr/bin/supervisord -c /etc/supervisor/supervisord.conf -i app && tail -f /var/log/supervisor/output.log

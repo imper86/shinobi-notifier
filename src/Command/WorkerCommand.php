@@ -6,13 +6,13 @@ namespace App\Command;
 
 use App\Event\NewVideoEvent;
 use App\Exception\NoConfigException;
+use App\Service\ConsoleLogger;
 use App\Service\ShinobiNewVideoFetcher;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[AsCommand('app:worker')]
@@ -21,23 +21,28 @@ final class WorkerCommand extends Command
     public function __construct(
         private readonly ShinobiNewVideoFetcher $newVideoFetcher,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ConsoleLogger $logger,
     ) {
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        sleep(1);
+        $this->logger->debug('app:worker started');
 
-        $io = new SymfonyStyle($input, $output);
+        sleep(1);
 
         try {
             foreach ($this->newVideoFetcher->fetch() as $video) {
                 $this->eventDispatcher->dispatch(new NewVideoEvent($video));
             }
         } catch (ClientExceptionInterface $exception) {
-            $io->error(sprintf('Shinobi connection error: %s', $exception->getMessage()));
-        } catch (NoConfigException) {}
+            $this->logger->error(sprintf('Shinobi connection error: %s', $exception->getMessage()));
+        } catch (NoConfigException) {
+            $this->logger->warning('App config not found. Please go to GUI and setup your config.');
+        }
+
+        $this->logger->debug('app:worker ended');
 
         return 0;
     }

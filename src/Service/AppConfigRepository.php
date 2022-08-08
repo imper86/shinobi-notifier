@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Exception\EmptyConfigException;
 use App\Exception\NoConfigException;
 use App\Model\AppConfig;
 use App\Model\ShinobiConfig;
@@ -22,8 +23,9 @@ final class AppConfigRepository
 
     /**
      * @throws NoConfigException
+     * @throws EmptyConfigException
      */
-    public function get(): AppConfig
+    public function get(bool $throwOnEmpty = true): AppConfig
     {
         if (null !== $this->config) {
             return $this->config;
@@ -31,11 +33,15 @@ final class AppConfigRepository
 
         $path = $this->getJsonPath();
 
-        if (!file_exists($path)) {
+        if (!$this->exists()) {
             throw new NoConfigException();
         }
 
         $this->config = $this->serializer->deserialize(file_get_contents($path), AppConfig::class, 'json');
+
+        if ($throwOnEmpty && $this->config->isEmpty) {
+            throw new EmptyConfigException();
+        }
 
         return $this->config;
     }
@@ -45,19 +51,30 @@ final class AppConfigRepository
         $this->config = $config;
 
         $serialized = $this->serializer->serialize($config, 'json');
+        $filePath = $this->getJsonPath();
+        $fileDir = dirname($filePath);
 
-        file_put_contents($this->getJsonPath(), $serialized);
+        if (!file_exists($fileDir)) {
+            mkdir($fileDir, 0755, true);
+        }
+
+        file_put_contents($filePath, $serialized);
     }
 
     public function createEmpty(): AppConfig
     {
         return new AppConfig(
-            new ShinobiConfig('http', 'localhost', 8080, 'changeme', 'changeme'),
+            new ShinobiConfig('http', 'host-or-ip-address', 8080, 'changeme', 'changeme'),
         );
+    }
+
+    public function exists(): bool
+    {
+        return file_exists($this->getJsonPath());
     }
 
     private function getJsonPath(): string
     {
-        return sprintf('%s/var/app_config.json', $this->parameterBag->get('kernel.project_dir'));
+        return sprintf('%s/var/config/app_config.json', $this->parameterBag->get('kernel.project_dir'));
     }
 }

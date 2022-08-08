@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Exception\EmptyConfigException;
+use App\Exception\NoConfigException;
 use App\Exception\ShinobiApiException;
 use App\Model\ShinobiApi\Monitor;
 use App\Model\ShinobiApi\VideosResponse;
 use App\Model\ShinobiConfig;
-use DateTime;
 use DateTimeInterface;
-use DateTimeZone;
+use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -26,11 +27,14 @@ final class ShinobiApi
         private readonly UriFactoryInterface $uriFactory,
         private readonly SerializerInterface $serializer,
         private readonly AppConfigRepository $appConfigRepository,
+        private readonly DateTimeConverter $timeConverter,
     ) {
     }
 
     /**
      * @throws ClientExceptionInterface
+     * @throws EmptyConfigException
+     * @throws NoConfigException
      * @throws ShinobiApiException
      */
     public function testConnection(): void
@@ -45,8 +49,10 @@ final class ShinobiApi
     }
 
     /**
-     * @return Monitor[]
      * @throws ClientExceptionInterface
+     * @throws EmptyConfigException
+     * @throws NoConfigException
+     * @throws ShinobiApiException
      */
     public function getMonitors(): array
     {
@@ -68,13 +74,14 @@ final class ShinobiApi
 
     /**
      * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function getVideos(?DateTimeInterface $newerThan = null): VideosResponse
     {
         $uri = $this->createResourceUri('videos');
 
         if ($newerThan) {
-            $newerThan = DateTime::createFromInterface($newerThan)->setTimezone(new DateTimeZone('UTC'));
+            $newerThan = $this->timeConverter->toUtcImmutable($newerThan);
             $uri = $uri->withQuery(http_build_query(['start' => $newerThan->format('Y-m-d\TH:i:s')]));
         }
 
@@ -88,13 +95,21 @@ final class ShinobiApi
         return $this->serializer->deserialize($response->getBody()->__toString(), VideosResponse::class, 'json');
     }
 
-    private function getBasePath(): string
+    /**
+     * @throws EmptyConfigException
+     * @throws NoConfigException
+     */
+    public function getBasePath(): string
     {
         $config = $this->getConfig();
 
         return sprintf('%s://%s:%d', $config->schema, $config->host, $config->port);
     }
 
+    /**
+     * @throws EmptyConfigException
+     * @throws NoConfigException
+     */
     private function createResourceUri(string $resource): UriInterface
     {
         $config = $this->getConfig();
@@ -110,6 +125,10 @@ final class ShinobiApi
         );
     }
 
+    /**
+     * @throws EmptyConfigException
+     * @throws NoConfigException
+     */
     private function getConfig(): ShinobiConfig
     {
         return $this->appConfigRepository->get()->shinobi;

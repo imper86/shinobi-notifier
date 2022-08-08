@@ -26,7 +26,7 @@ final class ConfigEditController extends AbstractController
     public function edit(Request $request): Response
     {
         try {
-            $config = $this->configRepository->get() ?: $this->configRepository->createEmpty();
+            $config = $this->configRepository->get(false);
         } catch (NoConfigException) {
             $config = $this->configRepository->createEmpty();
         }
@@ -35,6 +35,7 @@ final class ConfigEditController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $config->isEmpty = false;
             $this->configRepository->save($config);
 
             try {

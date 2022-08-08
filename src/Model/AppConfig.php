@@ -12,7 +12,10 @@ final class AppConfig
         public ShinobiConfig $shinobi,
         public array $activeMonitorIds = [],
         public ?DateTimeImmutable $lastVideoAppearedAt = null,
+        public string $timezone = 'UTC',
+        public bool $isEmpty = true,
         private array $notificationSenders = [],
+        private readonly string $version = 'v1.0',
     ) {
     }
 
@@ -46,5 +49,10 @@ final class AppConfig
         if (array_key_exists($key, $this->notificationSenders)) {
             $this->notificationSenders[$key] = $senderConfig;
         }
+    }
+
+    public function getVersion(): string
+    {
+        return $this->version;
     }
 }

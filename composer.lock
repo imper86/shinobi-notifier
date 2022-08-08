@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b512ddd3b2a8a9785d2c25a95e4db190",
+    "content-hash": "64be7fa52579d1a5332239b9c9959578",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -5343,6 +5343,104 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "imper86/vbump",
+            "version": "v1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/imper86/vbump.git",
+                "reference": "400d683c53d01f884c6ce33d8ed7d40cf433c627"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/imper86/vbump/zipball/400d683c53d01f884c6ce33d8ed7d40cf433c627",
+                "reference": "400d683c53d01f884c6ce33d8ed7d40cf433c627",
+                "shasum": ""
+            },
+            "require": {
+                "phlak/semver": "^3.2",
+                "php": ">=7.1"
+            },
+            "bin": [
+                "bin/vbump"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "imper",
+                    "email": "me@imper.info"
+                }
+            ],
+            "description": "version bumper, using git tags",
+            "support": {
+                "issues": "https://github.com/imper86/vbump/issues",
+                "source": "https://github.com/imper86/vbump/tree/v1.0.3"
+            },
+            "time": "2021-04-14T17:49:42+00:00"
+        },
+        {
+            "name": "phlak/semver",
+            "version": "3.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHLAK/SemVer.git",
+                "reference": "2167230f819d43d565194e2e91d69a1fa110c3df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHLAK/SemVer/zipball/2167230f819d43d565194e2e91d69a1fa110c3df",
+                "reference": "2167230f819d43d565194e2e91d69a1fa110c3df",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.16.1",
+                "phpunit/phpunit": "^7.0 || ^8.0 || ^9.0",
+                "psy/psysh": "^0.10",
+                "vimeo/psalm": "^3.7"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Support/helpers.php"
+                ],
+                "psr-4": {
+                    "PHLAK\\SemVer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Kankiewicz",
+                    "email": "Chris@ChrisKankiewicz.com"
+                }
+            ],
+            "description": "Semantic versioning helper library",
+            "support": {
+                "issues": "https://github.com/PHLAK/SemVer/issues",
+                "source": "https://github.com/PHLAK/SemVer/tree/master"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/PHLAK",
+                    "type": "github"
+                },
+                {
+                    "url": "https://paypal.me/ChrisKankiewicz",
+                    "type": "paypal"
+                }
+            ],
+            "time": "2020-04-10T17:31:42+00:00"
+        },
         {
             "name": "symfony/web-profiler-bundle",
             "version": "v6.1.2",
