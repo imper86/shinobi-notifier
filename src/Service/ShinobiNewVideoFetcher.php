@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Exception\NoConfigException;
-use App\Model\AppConfig;
 use App\Model\ShinobiApi\Video;
 use DateTimeImmutable;
-use EmptyIterator;
+use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 use Traversable;
 
@@ -16,23 +14,18 @@ final class ShinobiNewVideoFetcher
 {
     public function __construct(
         private readonly ShinobiApi $shinobiApi,
-        private readonly AppConfigRepository $configRepository
+        private readonly TimestampRepository $timestampRepository,
     ) {
     }
 
     /**
      * @return Traversable<int, Video>
-     * @throws ClientExceptionInterface|NoConfigException
+     * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function fetch(): Traversable
     {
-        $config = $this->configRepository->get();
-
-        if (null === $config) {
-            return new EmptyIterator();
-        }
-
-        $newerThan = $this->createNewerThan($config);
+        $newerThan = $this->createNewerThan();
         $lastVideoAppearedAt = null;
 
         $response = $this->shinobiApi->getVideos($newerThan);
@@ -45,14 +38,15 @@ final class ShinobiNewVideoFetcher
             }
         }
 
-        $config->lastVideoAppearedAt = $lastVideoAppearedAt ?? $newerThan;
-
-        $this->configRepository->save($config);
+        $this->timestampRepository->save('video_nt', $lastVideoAppearedAt ?? $newerThan);
     }
 
-    private function createNewerThan(AppConfig $config): DateTimeImmutable
+    /**
+     * @throws Exception
+     */
+    private function createNewerThan(): DateTimeImmutable
     {
-        $newerThan = $config->lastVideoAppearedAt;
+        $newerThan = $this->timestampRepository->load('video_nt');
         $minNewerThan = new DateTimeImmutable('-5 minutes');
 
         return (null === $newerThan || $newerThan < $minNewerThan) ? $minNewerThan : $newerThan;

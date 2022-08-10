@@ -2,6 +2,12 @@
 
 {% block body %}
     <div class="d-grid gap-3">
+        <a
+            role="button"
+            href="{{ path('app.main.monitors.activate') }}"
+            class="btn btn-outline-primary mb-3"
+        >Activate all</a>
+
         {% for monitor in monitors %}
             <a
                 role="button"
@@ -9,5 +15,11 @@
                 class="btn {{ isMonitorActive(monitor.mid) ? 'btn-success' : 'btn-outline-danger' }}"
             >{{ monitor.name }}</a>
         {% endfor %}
+
+        <a
+            role="button"
+            href="{{ path('app.main.monitors.deactivate') }}"
+            class="btn btn-outline-warning mt-3"
+        >Deactivate all</a>
     </div>
 {% endblock %}

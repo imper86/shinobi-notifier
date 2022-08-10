@@ -49,6 +49,7 @@ final class ShinobiApi
     }
 
     /**
+     * @return Monitor[]
      * @throws ClientExceptionInterface
      * @throws EmptyConfigException
      * @throws NoConfigException

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\ShinobiApi\Monitor;
 use App\Service\AppConfigRepository;
 use App\Service\ShinobiApi;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -52,6 +53,32 @@ final class MainController extends AbstractController
         } else {
             $config->activeMonitorIds[] = $monitorId;
         }
+
+        $this->configRepository->save($config);
+
+        return $this->redirectToRoute('app.main');
+    }
+
+    #[Route("/monitors/activate", "app.main.monitors.activate")]
+    public function activateMonitors(): Response
+    {
+        $config = $this->configRepository->get();
+
+        $config->activeMonitorIds = array_map(
+            fn (Monitor $monitor): string => $monitor->mid,
+            $this->shinobiApi->getMonitors(),
+        );
+
+        $this->configRepository->save($config);
+
+        return $this->redirectToRoute('app.main');
+    }
+
+    #[Route("/monitors/deactivate", "app.main.monitors.deactivate")]
+    public function deactivateMonitors(): Response
+    {
+        $config = $this->configRepository->get();
+        $config->activeMonitorIds = [];
 
         $this->configRepository->save($config);
 
