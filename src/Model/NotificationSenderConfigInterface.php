@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use App\Model\NotificationSenderConfig\MailConfig;
 use App\Model\NotificationSenderConfig\SlackConfig;
 use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
 
@@ -11,6 +12,7 @@ use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
     'type',
     [
         'slack' => SlackConfig::class,
+        'mail' => MailConfig::class,
     ]
 )]
 interface NotificationSenderConfigInterface

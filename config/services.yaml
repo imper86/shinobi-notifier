@@ -37,3 +37,7 @@ services:
     App\EventSubscriber\NotificationSubscriber:
         arguments:
             $notificationSenderLocator: !tagged_locator {tag: 'app.service.notification_sender', index_by: 'key', default_index_method: 'getId'}
+
+    App\Factory\MailerFactory:
+        arguments:
+            $transport: '@mailer.transport_factory'
