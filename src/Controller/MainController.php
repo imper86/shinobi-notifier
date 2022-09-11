@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Model\ShinobiApi\Monitor;
-use App\Service\AppConfigRepository;
+use App\Service\MonitorToggleService;
 use App\Service\ShinobiApi;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,7 +15,7 @@ final class MainController extends AbstractController
 {
     public function __construct(
         private readonly ShinobiApi $shinobiApi,
-        private readonly AppConfigRepository $configRepository
+        private readonly MonitorToggleService $monitorToggleService,
     ) {
     }
 
@@ -42,19 +41,7 @@ final class MainController extends AbstractController
     #[Route("/toggle/{monitorId}", "app.main.toggle_monitor")]
     public function toggleMonitor(string $monitorId): Response
     {
-        $config = $this->configRepository->get();
-
-        if (in_array($monitorId, $config->activeMonitorIds, true)) {
-            array_splice(
-                $config->activeMonitorIds,
-                array_search($monitorId, $config->activeMonitorIds),
-                1
-            );
-        } else {
-            $config->activeMonitorIds[] = $monitorId;
-        }
-
-        $this->configRepository->save($config);
+        $this->monitorToggleService->toggle($monitorId);
 
         return $this->redirectToRoute('app.main');
     }
@@ -62,14 +49,7 @@ final class MainController extends AbstractController
     #[Route("/monitors/activate", "app.main.monitors.activate")]
     public function activateMonitors(): Response
     {
-        $config = $this->configRepository->get();
-
-        $config->activeMonitorIds = array_map(
-            fn (Monitor $monitor): string => $monitor->mid,
-            $this->shinobiApi->getMonitors(),
-        );
-
-        $this->configRepository->save($config);
+        $this->monitorToggleService->turnOnAll();
 
         return $this->redirectToRoute('app.main');
     }
@@ -77,10 +57,7 @@ final class MainController extends AbstractController
     #[Route("/monitors/deactivate", "app.main.monitors.deactivate")]
     public function deactivateMonitors(): Response
     {
-        $config = $this->configRepository->get();
-        $config->activeMonitorIds = [];
-
-        $this->configRepository->save($config);
+        $this->monitorToggleService->turnOffAll();
 
         return $this->redirectToRoute('app.main');
     }

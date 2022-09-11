@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
+use App\Event\MonitorToggleEvent;
 use App\Event\NewVideoEvent;
 use App\Exception\EmptyConfigException;
 use App\Exception\NoConfigException;
@@ -33,7 +34,24 @@ final class NotificationSubscriber implements EventSubscriberInterface
     {
         return [
             NewVideoEvent::class => ['onNewVideo', 0],
+            MonitorToggleEvent::class => ['onMonitorToggle', 0],
         ];
+    }
+
+    public function onMonitorToggle(MonitorToggleEvent $event): void
+    {
+        $config = $this->configRepository->get();
+
+        foreach ($config->getNotificationSenders() as $senderConfig) {
+            if ($senderConfig->isEnabled()) {
+                /** @var NotificationSenderInterface $sender */
+                $sender = $this->notificationSenderLocator->get($senderConfig::getServiceId());
+                $sender->send(
+                    $senderConfig,
+                    sprintf('[%s] turned %s', $event->monitorId, $event->status ? 'on' : 'off'),
+                );
+            }
+        }
     }
 
     /**
